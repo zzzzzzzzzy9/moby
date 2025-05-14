@@ -659,15 +659,19 @@ func (ls *layerStore) initMount(graphID, parent, mountLabel string, initFunc Mou
 	}
 	p, err := ls.driver.Get(initID, "")
 	if err != nil {
+		// cleanup on failure
+		ls.driver.Remove(initID)
 		return "", err
 	}
 
 	if err := initFunc(p); err != nil {
 		ls.driver.Put(initID)
+		ls.driver.Remove(initID)
 		return "", err
 	}
 
 	if err := ls.driver.Put(initID); err != nil {
+		ls.driver.Remove(initID)
 		return "", err
 	}
 
